@@ -5,6 +5,8 @@ import PlaygroundSupport
 
 class Touchable : UIView, UIGestureRecognizerDelegate {
     
+    var previousLocation = CGPoint.zero
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         isUserInteractionEnabled = true
@@ -33,7 +35,7 @@ class Touchable : UIView, UIGestureRecognizerDelegate {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        print("Began touches")
+        previousLocation = center
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -43,17 +45,23 @@ class Touchable : UIView, UIGestureRecognizerDelegate {
     /// 1-2 Draggable View without stored variables
     @objc func panAround(sender: UIPanGestureRecognizer) {
         
-        let translation = sender.translation(in: self)
-        transform = transform.translatedBy(x: translation.x - transform.tx, y: translation.y - transform.ty)
-
-        if sender.state == .ended {
-            let newCenter = CGPoint(
-                x: center.x + transform.tx,
-                y: center.y + transform.ty)
-            transform = CGAffineTransform.identity
-            center = newCenter
-            return
-        }
+        let translation = sender.translation(in: superview)
+        let newCenter = CGPoint (
+            x: previousLocation.x + translation.x,
+            y: previousLocation.y + translation.y
+        )
+        /// 1-4 Constraining Movements to superview
+        let midPoints = CGPoint (x: bounds.midX, y: bounds.midY)
+        let newX = min(
+            (superview ?? self).bounds.size.width - midPoints.x,
+            max(newCenter.x, midPoints.x)
+            )
+        let newY = min(
+            (superview ?? self).bounds.size.height - midPoints.y,
+            max(newCenter.y, midPoints.y)
+        )
+        center = CGPoint(x: newX, y: newY)
+       
     }
     
     @objc func handlePinch(sender: UIPinchGestureRecognizer) {
