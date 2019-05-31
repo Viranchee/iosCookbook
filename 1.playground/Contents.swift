@@ -3,19 +3,44 @@
 import UIKit
 import PlaygroundSupport
 
-class Touchable : UIView {
-
+class Touchable : UIView, UIGestureRecognizerDelegate {
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
-
+        isUserInteractionEnabled = true
+        backgroundColor = #colorLiteral(red: 0.8078431487, green: 0.02745098062, blue: 0.3333333433, alpha: 1)
+        super.bringSubviewToFront(self)
+        
         let panGR = UIPanGestureRecognizer(target: self, action: #selector(panAround(sender:)))
         addGestureRecognizer(panGR)
+        
+        let pinchGR = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(sender:)))
+        addGestureRecognizer(pinchGR)
+        
+        let rotateGR = UIRotationGestureRecognizer(target: self, action: #selector(handleRotate(sender:)))
+        addGestureRecognizer(rotateGR)
+        
+        guard (gestureRecognizers != nil) else { return }
+        
+        for gr in gestureRecognizers! {
+            gr.delegate = self
+            
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("Not Implemented")
     }
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        print("Began touches")
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        print("Touches ended")
+    }
+    
+    /// 1-2 Draggable View without stored variables
     @objc func panAround(sender: UIPanGestureRecognizer) {
         super.bringSubviewToFront(self)
         let scale: CGFloat = 1.07
@@ -37,16 +62,38 @@ class Touchable : UIView {
             return
         }
     }
+    
+    @objc func handlePinch(sender: UIPinchGestureRecognizer) {
+        let scale = sender.scale
+        guard scale > 0.5 else { return }
+        let scaledTransform = CGAffineTransform(scaleX: scale, y: scale)
+        
+//        let translation = sender.location(in: self)
+        let theTransform = scaledTransform
+        
+        transform = theTransform
+    }
+    
+    @objc func handleRotate(sender: UIRotationGestureRecognizer) {
+        
+        let degrees = sender.rotation * 180 / CGFloat.pi
+        
+        let mod = transform.rotated(by: degrees)
+        transform = mod
+    }
+ 
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
 }
 
 class MyViewController : UIViewController {
-    let rect = Touchable()
+    let rect = Touchable(frame: CGRect(x: 50, y: 70, width: 100, height: 100))
     let label = UILabel()
     
     override func viewDidLoad() {
         view.backgroundColor = #colorLiteral(red: 0.3647058904, green: 0.06666667014, blue: 0.9686274529, alpha: 1)
-        rect.backgroundColor = #colorLiteral(red: 0.8078431487, green: 0.02745098062, blue: 0.3333333433, alpha: 1)
-        rect.frame = CGRect(x: 50, y: 70, width: 100, height: 100)
+//        rect.frame = CGRect(x: 50, y: 70, width: 100, height: 100)
         
         label.frame = CGRect(x: 150, y: 200, width: 200, height: 20)
         label.text = "Hello World!"
