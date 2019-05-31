@@ -58,17 +58,6 @@ class MyViewController : UIViewController {
     }
 }
 
-protocol Tol {
-    var x: Int { get }
-}
-struct J: Tol {
-    var x: Int = 5
-}
-func draw(val: JTol) {
-    print(val)
-}
-
-
 let vc = MyViewController()
 vc.preferredContentSize = CGSize(width: 768, height: 1024)
 PlaygroundPage.current.liveView = vc
