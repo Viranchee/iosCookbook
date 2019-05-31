@@ -42,17 +42,10 @@ class Touchable : UIView, UIGestureRecognizerDelegate {
     
     /// 1-2 Draggable View without stored variables
     @objc func panAround(sender: UIPanGestureRecognizer) {
-        super.bringSubviewToFront(self)
-        let scale: CGFloat = 1.07
-        let scaledTransform = CGAffineTransform(scaleX: scale, y: scale)
         
         let translation = sender.translation(in: self)
-        var theTransform = scaledTransform
-        theTransform.tx = translation.x
-        theTransform.ty = translation.y
-        
-        transform = theTransform
-        
+        transform = transform.translatedBy(x: translation.x - transform.tx, y: translation.y - transform.ty)
+
         if sender.state == .ended {
             let newCenter = CGPoint(
                 x: center.x + transform.tx,
@@ -64,21 +57,21 @@ class Touchable : UIView, UIGestureRecognizerDelegate {
     }
     
     @objc func handlePinch(sender: UIPinchGestureRecognizer) {
-        let scale = sender.scale
-        guard scale > 0.5 else { return }
+        let scale = sender.scale > 0.5 ? sender.scale : 0.5
         transform = transform.scaledBy(x: scale, y: scale)
     }
     
     @objc func handleRotate(sender: UIRotationGestureRecognizer) {
-        
         transform = transform.rotated(by: sender.rotation)
-        
-        
     }
  
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }
+}
+
+class Drawable: UIView, UIGestureRecognizerDelegate {
+    
 }
 
 class MyViewController : UIViewController {
