@@ -66,20 +66,14 @@ class Touchable : UIView, UIGestureRecognizerDelegate {
     @objc func handlePinch(sender: UIPinchGestureRecognizer) {
         let scale = sender.scale
         guard scale > 0.5 else { return }
-        let scaledTransform = CGAffineTransform(scaleX: scale, y: scale)
-        
-//        let translation = sender.location(in: self)
-        let theTransform = scaledTransform
-        
-        transform = theTransform
+        transform = transform.scaledBy(x: scale, y: scale)
     }
     
     @objc func handleRotate(sender: UIRotationGestureRecognizer) {
         
-        let degrees = sender.rotation * 180 / CGFloat.pi
+        transform = transform.rotated(by: sender.rotation)
         
-        let mod = transform.rotated(by: degrees)
-        transform = mod
+        
     }
  
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
